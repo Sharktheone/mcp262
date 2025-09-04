@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/Sharktheone/mcp262/test"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -21,6 +22,9 @@ func main() {
 	server := mcp.NewServer(&mcp.Implementation{Name: "greeter", Version: "v1.0.0"}, nil)
 
 	mcp.AddTool(server, &mcp.Tool{Name: "greet", Description: "say hi"}, SayHi)
+
+	test.AddTools(server)
+
 	// Run the server over stdin/stdout, until the client disconnects
 	if err := server.Run(context.Background(), &mcp.StdioTransport{}); err != nil {
 		log.Fatal(err)
