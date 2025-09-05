@@ -3,6 +3,7 @@ package test
 import (
 	"context"
 
+	"github.com/Sharktheone/mcp262/utils"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -11,19 +12,17 @@ type NumTestParams struct {
 }
 
 func NumTests(ctx context.Context, req *mcp.CallToolRequest, args NumTestParams) (*mcp.CallToolResult, any, error) {
-
 	n, err := getNumTests(args.Path)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	return &mcp.CallToolResult{
-		StructuredContent: map[string]any{
-			"num_tests": n,
-			"path":      args.Path,
-		},
-	}, nil, nil
+	res := map[string]any{
+		"num_tests": n,
+		"path":      args.Path,
+	}
 
+	return utils.RespondWith(res), nil, nil
 }
 
 func AddTools(server *mcp.Server) {
