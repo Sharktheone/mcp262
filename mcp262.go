@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Sharktheone/mcp262/provider"
+	"github.com/Sharktheone/mcp262/provider/yavashark"
 	"github.com/Sharktheone/mcp262/test"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -21,6 +23,14 @@ func SayHi(ctx context.Context, req *mcp.CallToolRequest, args HiParams) (*mcp.C
 }
 
 func main() {
+	p, err := yavashark.NewYavasharkTestProvider()
+	if err != nil {
+		log.Fatalf("Failed to create YavasharkTestProvider: %v", err)
+		return
+	}
+
+	provider.SetProvider(p)
+
 	url := "0.0.0.0:8080"
 
 	server := mcp.NewServer(&mcp.Implementation{Name: "greeter", Version: "v1.0.0"}, nil)
