@@ -11,8 +11,10 @@ type TestProvider interface {
 	GetFailedTestsInDir(dir string) ([]string, error)
 
 	GetTestOutput(testPath string) (string, error)
+}
 
-	RerunTest(testPath string) (string, error)
-	RerunTestsInDir(dir string) (map[string]string, error)
-	RerunFailedTestsInDir(dir string) (map[string]string, error)
+var Provider TestProvider
+
+func SetProvider(p TestProvider) {
+	Provider = p
 }
