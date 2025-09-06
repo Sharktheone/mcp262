@@ -3,6 +3,7 @@ package test
 import (
 	"context"
 	"errors"
+	"log"
 	"sort"
 
 	"github.com/Sharktheone/mcp262/provider"
@@ -13,33 +14,46 @@ import (
 const DefaultPageSize = 20
 
 type NumTestsRecursiveParams struct {
-	Path string `json:"path" jsonschema:"Path of the directory, starting from /test262/test/{builtins,language,...}/..., /test/{builtins,language,...}/... or just /{builtins,language,...}/..."`
+	Path string `json:"path" jsonschema:"Path of the directory, starting from /test262/test/{built-ins,language,...}/..., /test/{built-ins,language,...}/... or just /{built-ins,language,...}/..."`
 }
 
 type GetTestStatusParams struct {
 	TestPath string `json:"test_path" jsonschema:"Path to the single test file (e.g. /test262/test/language/...)"`
 }
 
-type Pagination struct {
-	Page     int `json:"page" jsonschema:"Page number starting from 1; defaults to 1"`
-	PageSize int `json:"page_size" jsonschema:"Items per page; defaults to DefaultPageSize if omitted"`
-	Max      int `json:"max" jsonschema:"Optional global maximum number of items to include across all pages; 0 means no limit"`
+//type Pagination struct {
+//	Page     int `json:"page" jsonschema:"Page number starting from 1; defaults to 1"`
+//	PageSize int `json:"page_size" jsonschema:"Items per page; defaults to DefaultPageSize if omitted"`
+//	Max      int `json:"max" jsonschema:"Optional global maximum number of items to include across all pages; 0 means no limit"`
+//}
+
+type GetTestsInDirParams struct {
+	Path     string `json:"path" jsonschema:"Directory path to filter tests by status"`
+	Page     int    `json:"page" jsonschema:"Page number starting from 1; defaults to 1"`
+	PageSize int    `json:"page_size" jsonschema:"Items per page; defaults to DefaultPageSize if omitted"`
+	Max      int    `json:"max" jsonschema:"Optional global maximum number of items to include across all pages; 0 means no limit"`
 }
 
 type GetStatusesInDirParams struct {
-	Path string `json:"path" jsonschema:"Directory path to list statuses for"`
-	Pagination
+	Path     string `json:"path" jsonschema:"Directory path to list statuses for"`
+	Page     int    `json:"page" jsonschema:"Page number starting from 1; defaults to 1"`
+	PageSize int    `json:"page_size" jsonschema:"Items per page; defaults to DefaultPageSize if omitted"`
+	Max      int    `json:"max" jsonschema:"Optional global maximum number of items to include across all pages; 0 means no limit"`
 }
 
 type GetTestsWithStatusInDirParams struct {
-	Path   string `json:"path" jsonschema:"Directory path to filter tests by status"`
-	Status string `json:"status" jsonschema:"Status to filter by (e.g. PASS, FAIL, SKIP, TIMEOUT, CRASH, PARSE_ERROR, NOT_IMPLEMENTED, RUNNER_ERROR)"`
-	Pagination
+	Path     string `json:"path" jsonschema:"Directory path to filter tests by status"`
+	Status   string `json:"status" jsonschema:"Status to filter by (e.g. PASS, FAIL, SKIP, TIMEOUT, CRASH, PARSE_ERROR, NOT_IMPLEMENTED, RUNNER_ERROR)"`
+	Page     int    `json:"page" jsonschema:"Page number starting from 1; defaults to 1"`
+	PageSize int    `json:"page_size" jsonschema:"Items per page; defaults to DefaultPageSize if omitted"`
+	Max      int    `json:"max" jsonschema:"Optional global maximum number of items to include across all pages; 0 means no limit"`
 }
 
 type GetFailedTestsInDirParams struct {
-	Path string `json:"path" jsonschema:"Directory path to list failed tests for"`
-	Pagination
+	Path     string `json:"path" jsonschema:"Directory path to list failed tests for"`
+	Page     int    `json:"page" jsonschema:"Page number starting from 1; defaults to 1"`
+	PageSize int    `json:"page_size" jsonschema:"Items per page; defaults to DefaultPageSize if omitted"`
+	Max      int    `json:"max" jsonschema:"Optional global maximum number of items to include across all pages; 0 means no limit"`
 }
 
 type GetTestOutputParams struct {
@@ -57,17 +71,83 @@ func NumTestsTotal(ctx context.Context, req *mcp.CallToolRequest, _ struct{}) (*
 	return utils.RespondWith(map[string]any{"num_tests": n}), nil, nil
 }
 
+func NumTestsInDir(ctx context.Context, req *mcp.CallToolRequest, args NumTestsRecursiveParams) (*mcp.CallToolResult, any, error) {
+	prov, err := getProvider()
+	if err != nil {
+		return nil, nil, err
+	}
+	p := utils.ResolvePath(args.Path)
+	log.Printf("Resolved path: %s", p)
+	n, err := prov.NumTestsInDir(p)
+	if err != nil {
+		return nil, nil, err
+	}
+	return utils.RespondWith(map[string]any{"num_tests": n, "path": args.Path, "recursive": true}), nil, nil
+
+}
+
 func NumTestsInDirRecursive(ctx context.Context, req *mcp.CallToolRequest, args NumTestsRecursiveParams) (*mcp.CallToolResult, any, error) {
 	prov, err := getProvider()
 	if err != nil {
 		return nil, nil, err
 	}
 	p := utils.ResolvePath(args.Path)
-	n, err := prov.NumTestInDirRec(p)
+	log.Printf("Resolved path: %s", p)
+	n, err := prov.NumTestsInDirRec(p)
 	if err != nil {
 		return nil, nil, err
 	}
 	return utils.RespondWith(map[string]any{"num_tests": n, "path": args.Path, "recursive": true}), nil, nil
+}
+
+func GetTestsInDir(ctx context.Context, req *mcp.CallToolRequest, args GetTestsInDirParams) (*mcp.CallToolResult, any, error) {
+	prov, err := getProvider()
+	if err != nil {
+		return nil, nil, err
+	}
+	p := utils.ResolvePath(args.Path)
+	tests, err := prov.GetTestsInDir(p)
+	if err != nil {
+		return nil, nil, err
+	}
+	sort.Strings(tests)
+	page, pageSize := normalizePage(args.Page, args.PageSize)
+	items, remaining, total := paginateStrings(tests, page, pageSize, args.Max)
+	res := map[string]any{
+		"path":      args.Path,
+		"page":      page,
+		"page_size": pageSize,
+		"returned":  len(items),
+		"remaining": remaining,
+		"total":     total,
+		"tests":     items,
+	}
+	return utils.RespondWith(res), nil, nil
+}
+
+func GetTestsInDirRec(ctx context.Context, req *mcp.CallToolRequest, args GetTestsInDirParams) (*mcp.CallToolResult, any, error) {
+	prov, err := getProvider()
+	if err != nil {
+		return nil, nil, err
+	}
+	p := utils.ResolvePath(args.Path)
+	tests, err := prov.GetTestsInDirRec(p)
+	if err != nil {
+		return nil, nil, err
+	}
+	sort.Strings(tests)
+	page, pageSize := normalizePage(args.Page, args.PageSize)
+	items, remaining, total := paginateStrings(tests, page, pageSize, args.Max)
+	res := map[string]any{
+		"path":      args.Path,
+		"page":      page,
+		"page_size": pageSize,
+		"returned":  len(items),
+		"remaining": remaining,
+		"total":     total,
+		"tests":     items,
+	}
+	return utils.RespondWith(res), nil, nil
 }
 
 func GetTestStatus(ctx context.Context, req *mcp.CallToolRequest, args GetTestStatusParams) (*mcp.CallToolResult, any, error) {
@@ -273,9 +353,24 @@ func AddTools(server *mcp.Server) {
 	}, NumTestsTotal)
 
 	mcp.AddTool(server, &mcp.Tool{
+		Name:        "NumTestsInDir",
+		Description: "Get the number of tests in a directory",
+	}, NumTestsInDir)
+
+	mcp.AddTool(server, &mcp.Tool{
 		Name:        "NumTestsInDirRecursive",
 		Description: "Get the number of tests in a directory recursively",
 	}, NumTestsInDirRecursive)
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "GetTestsInDirRecursive",
+		Description: "List tests in a directory recursively (paginated)",
+	}, GetTestsInDirRec)
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "GetTestsInDir",
+		Description: "List tests in a directory (paginated)",
+	}, GetTestsInDir)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "GetTestStatus",
@@ -283,7 +378,7 @@ func AddTools(server *mcp.Server) {
 	}, GetTestStatus)
 
 	mcp.AddTool(server, &mcp.Tool{
-		Name:        "GetTestStatusesInDirRec",
+		Name:        "GetTestStatusesInDirRecursive",
 		Description: "List statuses for tests in a directory recursively (paginated)",
 	}, GetTestStatusesInDirRec)
 
@@ -293,7 +388,7 @@ func AddTools(server *mcp.Server) {
 	}, GetTestStatusesInDir)
 
 	mcp.AddTool(server, &mcp.Tool{
-		Name:        "GetTestsWithStatusInDirRec",
+		Name:        "GetTestsWithStatusInDirRecursive",
 		Description: "List tests with a specific status in a directory recursively (paginated)",
 	}, GetTestsWithStatusInDirRec)
 
@@ -303,7 +398,7 @@ func AddTools(server *mcp.Server) {
 	}, GetTestsWithStatusInDir)
 
 	mcp.AddTool(server, &mcp.Tool{
-		Name:        "GetFailedTestsInDirRec",
+		Name:        "GetFailedTestsInDirRecursive",
 		Description: "List failed tests in a directory recursively (paginated)",
 	}, GetFailedTestsInDirRec)
 
@@ -313,7 +408,7 @@ func AddTools(server *mcp.Server) {
 	}, GetFailedTestsInDir)
 
 	mcp.AddTool(server, &mcp.Tool{
-		Name:        "GetTestsWithStatusInDirRec",
+		Name:        "GetTestsWithStatusInDirRecursive",
 		Description: "List tests with a specific status in a directory recursively (paginated)",
 	}, GetTestsWithStatusInDirRec)
 
