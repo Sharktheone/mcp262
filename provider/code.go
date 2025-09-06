@@ -1,4 +1,4 @@
-package test
+package provider
 
 type TestCodeProvider interface {
 	GetTestCode(testPath string) (string, error)
@@ -11,4 +11,10 @@ type TestCodeProvider interface {
 	SetHarnessCode(filePath string, code string) error
 
 	ResetEdits() error
+}
+
+var CodeProvider TestCodeProvider
+
+func SetCodeProvider(p TestCodeProvider) {
+	CodeProvider = p
 }
