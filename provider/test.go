@@ -24,7 +24,7 @@ type TestProvider interface {
 	SearchTest(query string) ([]string, error)
 	SearchTestInDir(dir string, query string) ([]string, error)
 
-	GetTestOutput(testPath string) (string, error)
+	GetTestOutput(testPath string) (string, string, error)
 }
 
 var Provider TestProvider

@@ -4,14 +4,24 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"net/url"
 	"slices"
 
 	"github.com/Sharktheone/mcp262/testtree"
 )
 
 const RESULTS_URL = "https://raw.githubusercontent.com/Sharktheone/yavashark-data/refs/heads/main/results.json"
+const BASE_RESULT_URL = "https://raw.githubusercontent.com/Sharktheone/yavashark-data/refs/heads/main/results"
 
 var FailedStatuses = []string{"FAIL", "TIMEOUT", "CRASH", "NOT_IMPLEMENTED", "RUNNER_ERROR", "ERROR"}
+
+type YavasharkResult struct {
+	Status   string `json:"status"`
+	Message  string `json:"msg"`
+	Path     string `json:"path"`
+	MemoryKB int    `json:"memory_kb"`
+	Duration int    `json:"duration"`
+}
 
 type YavasharkTestProvider struct {
 	*testtree.TestTree
@@ -87,8 +97,29 @@ func (yt *YavasharkTestProvider) GetFailedTestsInDirRec(dir string) ([]string, e
 	return nil, errors.New("directory not found")
 }
 
-func (yt *YavasharkTestProvider) GetTestOutput(testPath string) (string, error) {
-	return "", errors.New("not implemented")
+func (yt *YavasharkTestProvider) GetTestOutput(testPath string) (string, string, error) {
+	urlString, err := url.JoinPath(BASE_RESULT_URL, testPath+".json")
+	if err != nil {
+		return "", "", err
+	}
+
+	res, err := http.Get(urlString)
+	if err != nil {
+		return "", "", err
+	}
+
+	defer res.Body.Close()
+	if res.StatusCode != 200 {
+		return "", "", errors.New("test output not found")
+	}
+
+	var result YavasharkResult
+	err = json.NewDecoder(res.Body).Decode(&result)
+	if err != nil {
+		return "", "", err
+	}
+
+	return result.Message, result.Status, nil
 }
 
 func expandShortStatus(status string) string {

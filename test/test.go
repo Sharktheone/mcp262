@@ -370,11 +370,11 @@ func GetTestOutput(ctx context.Context, req *mcp.CallToolRequest, args GetTestOu
 		return nil, nil, err
 	}
 	p := utils.ResolvePath(args.TestPath)
-	out, err := prov.GetTestOutput(p)
+	out, status, err := prov.GetTestOutput(p)
 	if err != nil {
 		return nil, nil, err
 	}
-	return utils.RespondWith(map[string]any{"test_path": args.TestPath, "output": out}), nil, nil
+	return utils.RespondWith(map[string]any{"test_path": args.TestPath, "output": out, "status": status}), nil, nil
 }
 
 func SearchDir(ctx context.Context, req *mcp.CallToolRequest, args SearchDirParams) (*mcp.CallToolResult, any, error) {
