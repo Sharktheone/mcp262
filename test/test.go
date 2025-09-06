@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"sort"
+	"strings"
 
 	"github.com/Sharktheone/mcp262/provider"
 	"github.com/Sharktheone/mcp262/utils"
@@ -370,6 +371,11 @@ func GetTestOutput(ctx context.Context, req *mcp.CallToolRequest, args GetTestOu
 		return nil, nil, err
 	}
 	p := utils.ResolvePath(args.TestPath)
+
+	if !strings.HasSuffix(p, ".js") {
+		p += ".js"
+	}
+
 	out, status, err := prov.GetTestOutput(p)
 	if err != nil {
 		return nil, nil, err
