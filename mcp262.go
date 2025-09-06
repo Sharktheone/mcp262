@@ -38,6 +38,7 @@ func main() {
 	mcp.AddTool(server, &mcp.Tool{Name: "greet", Description: "say hi"}, SayHi)
 
 	test.AddTools(server)
+	test.AddCodeTools(server)
 
 	handler := mcp.NewStreamableHTTPHandler(func(req *http.Request) *mcp.Server {
 		return server
