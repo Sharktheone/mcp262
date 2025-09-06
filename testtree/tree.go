@@ -154,6 +154,28 @@ func (tt *TestTree) GetTestsWithStatusInDirRec(dir string, status string) ([]str
 
 func (tt *TestTree) SearchDir(query string) ([]string, error) {
 	q := strings.ToLower(query)
+
+	if root, ok := tt.Directories[""]; ok {
+		out := make([]string, 0)
+		var walk func(*TestTreeDir, int)
+		walk = func(td *TestTreeDir, matchedCount int) {
+			c := countOccurrences(strings.ToLower(td.Path), q)
+			if c > 0 && c > matchedCount {
+				out = append(out, td.Path)
+			}
+			next := matchedCount
+			if c > next {
+				next = c
+			}
+			for _, sub := range td.Directories {
+				walk(sub, next)
+			}
+		}
+		walk(root, 0)
+		sort.Strings(out)
+		return out, nil
+	}
+
 	out := make([]string, 0)
 	for p := range tt.Directories {
 		if strings.Contains(strings.ToLower(p), q) {
@@ -163,6 +185,7 @@ func (tt *TestTree) SearchDir(query string) ([]string, error) {
 	sort.Strings(out)
 	return out, nil
 }
+
 func (tt *TestTree) SearchDirIn(dir string, query string) ([]string, error) {
 	dn := normalizeDir(dir)
 	d, exists := tt.Directories[dn]
@@ -170,23 +193,56 @@ func (tt *TestTree) SearchDirIn(dir string, query string) ([]string, error) {
 		return nil, errors.New("directory not found")
 	}
 	q := strings.ToLower(query)
+
 	out := make([]string, 0)
-	var walk func(*TestTreeDir)
-	walk = func(td *TestTreeDir) {
-		if strings.Contains(strings.ToLower(td.Path), q) {
+	var walk func(*TestTreeDir, int)
+	walk = func(td *TestTreeDir, matchedCount int) {
+		c := countOccurrences(strings.ToLower(td.Path), q)
+		if c > 0 && c > matchedCount {
 			out = append(out, td.Path)
 		}
+		next := matchedCount
+		if c > next {
+			next = c
+		}
 		for _, sub := range td.Directories {
-			walk(sub)
+			walk(sub, next)
 		}
 	}
-	walk(d)
+	walk(d, 0)
 	sort.Strings(out)
 	return out, nil
 }
 
 func (tt *TestTree) SearchTest(query string) ([]string, error) {
 	q := strings.ToLower(query)
+
+	if root, ok := tt.Directories[""]; ok {
+		out := make([]string, 0)
+		var walk func(*TestTreeDir, int)
+		walk = func(td *TestTreeDir, matchedCount int) {
+			// Update matchedCount based on directory path
+			cDir := countOccurrences(strings.ToLower(td.Path), q)
+			next := matchedCount
+			if cDir > next {
+				next = cDir
+			}
+			// Include file only if it increases the occurrence count
+			for p := range td.Files {
+				cFile := countOccurrences(strings.ToLower(p), q)
+				if cFile > 0 && cFile > next {
+					out = append(out, p)
+				}
+			}
+			for _, sub := range td.Directories {
+				walk(sub, next)
+			}
+		}
+		walk(root, 0)
+		sort.Strings(out)
+		return out, nil
+	}
+
 	out := make([]string, 0)
 	for p := range tt.Files {
 		if strings.Contains(strings.ToLower(p), q) {
@@ -196,6 +252,7 @@ func (tt *TestTree) SearchTest(query string) ([]string, error) {
 	sort.Strings(out)
 	return out, nil
 }
+
 func (tt *TestTree) SearchTestInDir(dir string, query string) ([]string, error) {
 	dn := normalizeDir(dir)
 	d, exists := tt.Directories[dn]
@@ -203,19 +260,26 @@ func (tt *TestTree) SearchTestInDir(dir string, query string) ([]string, error) 
 		return nil, errors.New("directory not found")
 	}
 	q := strings.ToLower(query)
+
 	out := make([]string, 0)
-	var walk func(*TestTreeDir)
-	walk = func(td *TestTreeDir) {
+	var walk func(*TestTreeDir, int)
+	walk = func(td *TestTreeDir, matchedCount int) {
+		cDir := countOccurrences(strings.ToLower(td.Path), q)
+		next := matchedCount
+		if cDir > next {
+			next = cDir
+		}
 		for p := range td.Files {
-			if strings.Contains(strings.ToLower(p), q) {
+			cFile := countOccurrences(strings.ToLower(p), q)
+			if cFile > 0 && cFile > next {
 				out = append(out, p)
 			}
 		}
 		for _, sub := range td.Directories {
-			walk(sub)
+			walk(sub, next)
 		}
 	}
-	walk(d)
+	walk(d, 0)
 	sort.Strings(out)
 	return out, nil
 }
@@ -299,4 +363,26 @@ func (tt *TestTree) AddDir(p string) {
 			parentDir.Directories[np] = dir
 		}
 	}
+}
+
+// countOccurrences returns non-overlapping case-insensitive count of substr in s.
+// Assumes caller lower-cases inputs or supplies desired casing.
+func countOccurrences(s string, substr string) int {
+	if substr == "" {
+		return 0
+	}
+	count := 0
+	i := 0
+	for {
+		j := strings.Index(s[i:], substr)
+		if j == -1 {
+			break
+		}
+		count++
+		i += j + len(substr)
+		if i >= len(s) {
+			break
+		}
+	}
+	return count
 }

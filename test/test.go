@@ -377,7 +377,6 @@ func GetTestOutput(ctx context.Context, req *mcp.CallToolRequest, args GetTestOu
 	return utils.RespondWith(map[string]any{"test_path": args.TestPath, "output": out}), nil, nil
 }
 
-// New: SearchDir - search across directories (generic search)
 func SearchDir(ctx context.Context, req *mcp.CallToolRequest, args SearchDirParams) (*mcp.CallToolResult, any, error) {
 	prov, err := getProvider()
 	if err != nil {
@@ -402,7 +401,6 @@ func SearchDir(ctx context.Context, req *mcp.CallToolRequest, args SearchDirPara
 	return utils.RespondWith(res), nil, nil
 }
 
-// New: SearchDirIn - search within a specific directory
 func SearchDirIn(ctx context.Context, req *mcp.CallToolRequest, args SearchDirInParams) (*mcp.CallToolResult, any, error) {
 	prov, err := getProvider()
 	if err != nil {
@@ -429,7 +427,6 @@ func SearchDirIn(ctx context.Context, req *mcp.CallToolRequest, args SearchDirIn
 	return utils.RespondWith(res), nil, nil
 }
 
-// New: SearchTest - search tests by query
 func SearchTest(ctx context.Context, req *mcp.CallToolRequest, args SearchTestParams) (*mcp.CallToolResult, any, error) {
 	prov, err := getProvider()
 	if err != nil {
@@ -454,7 +451,6 @@ func SearchTest(ctx context.Context, req *mcp.CallToolRequest, args SearchTestPa
 	return utils.RespondWith(res), nil, nil
 }
 
-// New: SearchTestInDir - search tests within a directory
 func SearchTestInDir(ctx context.Context, req *mcp.CallToolRequest, args SearchTestInDirParams) (*mcp.CallToolResult, any, error) {
 	prov, err := getProvider()
 	if err != nil {
