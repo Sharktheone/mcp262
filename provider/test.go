@@ -18,6 +18,12 @@ type TestProvider interface {
 	GetFailedTestsInDir(dir string) ([]string, error)
 	GetFailedTestsInDirRec(dir string) ([]string, error)
 
+	SearchDir(query string) ([]string, error)
+	SearchDirIn(dir string, query string) ([]string, error)
+
+	SearchTest(query string) ([]string, error)
+	SearchTestInDir(dir string, query string) ([]string, error)
+
 	GetTestOutput(testPath string) (string, error)
 }
 

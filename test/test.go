@@ -60,6 +60,37 @@ type GetTestOutputParams struct {
 	TestPath string `json:"test_path" jsonschema:"Path to the single test file (e.g. /test262/test/language/...)"`
 }
 
+// Added search parameter structs
+type SearchDirParams struct {
+	Query    string `json:"query" jsonschema:"Search query"`
+	Page     int    `json:"page" jsonschema:"Page number starting from 1; defaults to 1"`
+	PageSize int    `json:"page_size" jsonschema:"Items per page; defaults to DefaultPageSize if omitted"`
+	Max      int    `json:"max" jsonschema:"Optional global maximum number of items to include across all pages; 0 means no limit"`
+}
+
+type SearchDirInParams struct {
+	Dir      string `json:"dir" jsonschema:"Directory path to restrict the search to"`
+	Query    string `json:"query" jsonschema:"Search query"`
+	Page     int    `json:"page" jsonschema:"Page number starting from 1; defaults to 1"`
+	PageSize int    `json:"page_size" jsonschema:"Items per page; defaults to DefaultPageSize if omitted"`
+	Max      int    `json:"max" jsonschema:"Optional global maximum number of items to include across all pages; 0 means no limit"`
+}
+
+type SearchTestParams struct {
+	Query    string `json:"query" jsonschema:"Search query for tests"`
+	Page     int    `json:"page" jsonschema:"Page number starting from 1; defaults to 1"`
+	PageSize int    `json:"page_size" jsonschema:"Items per page; defaults to DefaultPageSize if omitted"`
+	Max      int    `json:"max" jsonschema:"Optional global maximum number of items to include across all pages; 0 means no limit"`
+}
+
+type SearchTestInDirParams struct {
+	Dir      string `json:"dir" jsonschema:"Directory path to restrict the test search to"`
+	Query    string `json:"query" jsonschema:"Search query for tests"`
+	Page     int    `json:"page" jsonschema:"Page number starting from 1; defaults to 1"`
+	PageSize int    `json:"page_size" jsonschema:"Items per page; defaults to DefaultPageSize if omitted"`
+	Max      int    `json:"max" jsonschema:"Optional global maximum number of items to include across all pages; 0 means no limit"`
+}
+
 // Tool handlers
 
 func NumTestsTotal(ctx context.Context, req *mcp.CallToolRequest, _ struct{}) (*mcp.CallToolResult, any, error) {
@@ -346,6 +377,110 @@ func GetTestOutput(ctx context.Context, req *mcp.CallToolRequest, args GetTestOu
 	return utils.RespondWith(map[string]any{"test_path": args.TestPath, "output": out}), nil, nil
 }
 
+// New: SearchDir - search across directories (generic search)
+func SearchDir(ctx context.Context, req *mcp.CallToolRequest, args SearchDirParams) (*mcp.CallToolResult, any, error) {
+	prov, err := getProvider()
+	if err != nil {
+		return nil, nil, err
+	}
+	results, err := prov.SearchDir(args.Query)
+	if err != nil {
+		return nil, nil, err
+	}
+	sort.Strings(results)
+	page, pageSize := normalizePage(args.Page, args.PageSize)
+	items, remaining, total := paginateStrings(results, page, pageSize, args.Max)
+	res := map[string]any{
+		"query":     args.Query,
+		"page":      page,
+		"page_size": pageSize,
+		"returned":  len(items),
+		"remaining": remaining,
+		"total":     total,
+		"results":   items,
+	}
+	return utils.RespondWith(res), nil, nil
+}
+
+// New: SearchDirIn - search within a specific directory
+func SearchDirIn(ctx context.Context, req *mcp.CallToolRequest, args SearchDirInParams) (*mcp.CallToolResult, any, error) {
+	prov, err := getProvider()
+	if err != nil {
+		return nil, nil, err
+	}
+	dir := utils.ResolvePath(args.Dir)
+	results, err := prov.SearchDirIn(dir, args.Query)
+	if err != nil {
+		return nil, nil, err
+	}
+	sort.Strings(results)
+	page, pageSize := normalizePage(args.Page, args.PageSize)
+	items, remaining, total := paginateStrings(results, page, pageSize, args.Max)
+	res := map[string]any{
+		"dir":       args.Dir,
+		"query":     args.Query,
+		"page":      page,
+		"page_size": pageSize,
+		"returned":  len(items),
+		"remaining": remaining,
+		"total":     total,
+		"results":   items,
+	}
+	return utils.RespondWith(res), nil, nil
+}
+
+// New: SearchTest - search tests by query
+func SearchTest(ctx context.Context, req *mcp.CallToolRequest, args SearchTestParams) (*mcp.CallToolResult, any, error) {
+	prov, err := getProvider()
+	if err != nil {
+		return nil, nil, err
+	}
+	results, err := prov.SearchTest(args.Query)
+	if err != nil {
+		return nil, nil, err
+	}
+	sort.Strings(results)
+	page, pageSize := normalizePage(args.Page, args.PageSize)
+	items, remaining, total := paginateStrings(results, page, pageSize, args.Max)
+	res := map[string]any{
+		"query":     args.Query,
+		"page":      page,
+		"page_size": pageSize,
+		"returned":  len(items),
+		"remaining": remaining,
+		"total":     total,
+		"tests":     items,
+	}
+	return utils.RespondWith(res), nil, nil
+}
+
+// New: SearchTestInDir - search tests within a directory
+func SearchTestInDir(ctx context.Context, req *mcp.CallToolRequest, args SearchTestInDirParams) (*mcp.CallToolResult, any, error) {
+	prov, err := getProvider()
+	if err != nil {
+		return nil, nil, err
+	}
+	dir := utils.ResolvePath(args.Dir)
+	results, err := prov.SearchTestInDir(dir, args.Query)
+	if err != nil {
+		return nil, nil, err
+	}
+	sort.Strings(results)
+	page, pageSize := normalizePage(args.Page, args.PageSize)
+	items, remaining, total := paginateStrings(results, page, pageSize, args.Max)
+	res := map[string]any{
+		"dir":       args.Dir,
+		"query":     args.Query,
+		"page":      page,
+		"page_size": pageSize,
+		"returned":  len(items),
+		"remaining": remaining,
+		"total":     total,
+		"tests":     items,
+	}
+	return utils.RespondWith(res), nil, nil
+}
+
 func AddTools(server *mcp.Server) {
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "NumTestsTotal",
@@ -416,6 +551,27 @@ func AddTools(server *mcp.Server) {
 		Name:        "GetTestOutput",
 		Description: "Get the output of a single test",
 	}, GetTestOutput)
+
+	// Added search tool registrations
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "SearchDir",
+		Description: "Search repository paths by query (paginated)",
+	}, SearchDir)
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "SearchDirIn",
+		Description: "Search repository paths within a directory by query (paginated)",
+	}, SearchDirIn)
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "SearchTest",
+		Description: "Search tests by query (paginated)",
+	}, SearchTest)
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "SearchTestInDir",
+		Description: "Search tests within a directory by query (paginated)",
+	}, SearchTestInDir)
 }
 
 func getProvider() (provider.TestProvider, error) {

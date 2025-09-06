@@ -3,6 +3,7 @@ package testtree
 import (
 	"errors"
 	"path"
+	"sort"
 	"strings"
 )
 
@@ -149,6 +150,74 @@ func (tt *TestTree) GetTestsWithStatusInDirRec(dir string, status string) ([]str
 		return out, nil
 	}
 	return nil, errors.New("directory not found")
+}
+
+func (tt *TestTree) SearchDir(query string) ([]string, error) {
+	q := strings.ToLower(query)
+	out := make([]string, 0)
+	for p := range tt.Directories {
+		if strings.Contains(strings.ToLower(p), q) {
+			out = append(out, p)
+		}
+	}
+	sort.Strings(out)
+	return out, nil
+}
+func (tt *TestTree) SearchDirIn(dir string, query string) ([]string, error) {
+	dn := normalizeDir(dir)
+	d, exists := tt.Directories[dn]
+	if !exists {
+		return nil, errors.New("directory not found")
+	}
+	q := strings.ToLower(query)
+	out := make([]string, 0)
+	var walk func(*TestTreeDir)
+	walk = func(td *TestTreeDir) {
+		if strings.Contains(strings.ToLower(td.Path), q) {
+			out = append(out, td.Path)
+		}
+		for _, sub := range td.Directories {
+			walk(sub)
+		}
+	}
+	walk(d)
+	sort.Strings(out)
+	return out, nil
+}
+
+func (tt *TestTree) SearchTest(query string) ([]string, error) {
+	q := strings.ToLower(query)
+	out := make([]string, 0)
+	for p := range tt.Files {
+		if strings.Contains(strings.ToLower(p), q) {
+			out = append(out, p)
+		}
+	}
+	sort.Strings(out)
+	return out, nil
+}
+func (tt *TestTree) SearchTestInDir(dir string, query string) ([]string, error) {
+	dn := normalizeDir(dir)
+	d, exists := tt.Directories[dn]
+	if !exists {
+		return nil, errors.New("directory not found")
+	}
+	q := strings.ToLower(query)
+	out := make([]string, 0)
+	var walk func(*TestTreeDir)
+	walk = func(td *TestTreeDir) {
+		for p := range td.Files {
+			if strings.Contains(strings.ToLower(p), q) {
+				out = append(out, p)
+			}
+		}
+		for _, sub := range td.Directories {
+			walk(sub)
+		}
+	}
+	walk(d)
+	sort.Strings(out)
+	return out, nil
 }
 
 type TestTreeFile struct {
