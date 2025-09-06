@@ -7,8 +7,11 @@ type TestProvider interface {
 
 	GetTestStatus(testPath string) (string, error)
 	GetTestStatusesInDir(dir string) (map[string]string, error)
+	GetTestStatusesInDirRec(dir string) (map[string]string, error)
 	GetTestsWithStatusInDir(dir string, status string) ([]string, error)
+	GetTestsWithStatusInDirRec(dir string, status string) ([]string, error)
 	GetFailedTestsInDir(dir string) ([]string, error)
+	GetFailedTestsInDirRec(dir string) ([]string, error)
 
 	GetTestOutput(testPath string) (string, error)
 }
