@@ -3,13 +3,18 @@ package provider
 type TestProvider interface {
 	NumTests() int
 	NumTestsInDir(dir string) (int, error)
-	NumTestInDirRec(dir string) (int, error)
+	NumTestsInDirRec(dir string) (int, error)
+
+	GetTestsInDir(dir string) ([]string, error)
+	GetTestsInDirRec(dir string) ([]string, error)
 
 	GetTestStatus(testPath string) (string, error)
 	GetTestStatusesInDir(dir string) (map[string]string, error)
 	GetTestStatusesInDirRec(dir string) (map[string]string, error)
+
 	GetTestsWithStatusInDir(dir string, status string) ([]string, error)
 	GetTestsWithStatusInDirRec(dir string, status string) ([]string, error)
+
 	GetFailedTestsInDir(dir string) ([]string, error)
 	GetFailedTestsInDirRec(dir string) ([]string, error)
 
