@@ -4,6 +4,7 @@ type TestCodeProvider interface {
 	GetTestCode(testPath string) (string, error)
 	GetHarnessForTest(testPath string) (map[string]string, error)
 	GetHarness() (map[string]string, error)
+	GetHarnessCode(filePath string) (string, error)
 	GetHaressFiles() ([]string, error)
 	GetHarnessFilesForTest(testPath string) ([]string, error)
 

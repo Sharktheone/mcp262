@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/Sharktheone/mcp262/provider"
+	"github.com/Sharktheone/mcp262/provider/github"
 	"github.com/Sharktheone/mcp262/provider/yavashark"
 	"github.com/Sharktheone/mcp262/test"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -30,6 +31,7 @@ func main() {
 	}
 
 	provider.SetProvider(p)
+	provider.SetCodeProvider(github.NewGithubTest262CodeProvider())
 
 	url := "0.0.0.0:8080"
 

@@ -3,7 +3,6 @@ package test
 import (
 	"context"
 	"errors"
-	"log"
 	"sort"
 	"strings"
 
@@ -109,7 +108,6 @@ func NumTestsInDir(ctx context.Context, req *mcp.CallToolRequest, args NumTestsR
 		return nil, nil, err
 	}
 	p := utils.ResolvePath(args.Path)
-	log.Printf("Resolved path: %s", p)
 	n, err := prov.NumTestsInDir(p)
 	if err != nil {
 		return nil, nil, err
@@ -124,7 +122,6 @@ func NumTestsInDirRecursive(ctx context.Context, req *mcp.CallToolRequest, args 
 		return nil, nil, err
 	}
 	p := utils.ResolvePath(args.Path)
-	log.Printf("Resolved path: %s", p)
 	n, err := prov.NumTestsInDirRec(p)
 	if err != nil {
 		return nil, nil, err
