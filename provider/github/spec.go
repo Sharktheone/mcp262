@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"net/http"
+	"strings"
 
 	"golang.org/x/net/html"
 )
@@ -48,6 +49,9 @@ func (g *GithubSpecProvider) Initialize() error {
 					var buf bytes.Buffer
 					_ = html.Render(&buf, n)
 					id := a.Val
+
+					id = strings.TrimPrefix(id, "sec-")
+
 					g.Sections = append(g.Sections, id)
 					g.Content[id] = buf.String()
 					break
@@ -70,7 +74,7 @@ func (g *GithubSpecProvider) GetSpec(specPath string) (string, error) {
 		}
 	}
 
-	if content, exists := g.Content["sec-"+specPath]; exists {
+	if content, exists := g.Content[specPath]; exists {
 		return content, nil
 	}
 
@@ -84,7 +88,19 @@ func (g *GithubSpecProvider) SpecForIntrinsic(intrinsic string) (string, error) 
 		}
 	}
 
-	return "", errors.New("not implemented")
+	intrinsic = strings.TrimPrefix(intrinsic, "%")
+	intrinsic = strings.TrimSuffix(intrinsic, "%")
+	intrinsic = strings.ReplaceAll(intrinsic, "[[", "")
+	intrinsic = strings.ReplaceAll(intrinsic, "]]", "")
+	intrinsic = strings.ReplaceAll(intrinsic, "(", "")
+	intrinsic = strings.ReplaceAll(intrinsic, ")", "")
+	intrinsic = strings.ToLower(intrinsic)
+
+	if content, exists := g.Content[intrinsic]; exists {
+		return content, nil
+	}
+
+	return "", errors.New("spec section not found")
 }
 
 func (g *GithubSpecProvider) SearchSpec(query string) ([]string, error) {
@@ -94,5 +110,29 @@ func (g *GithubSpecProvider) SearchSpec(query string) ([]string, error) {
 		}
 	}
 
-	return nil, errors.New("not implemented")
+	matches := make([]string, 0)
+	for id, content := range g.Content {
+		if strings.Contains(strings.ToLower(content), strings.ToLower(query)) {
+			matches = append(matches, id)
+		}
+	}
+
+	return matches, nil
+}
+
+func (g *GithubSpecProvider) SearchSections(query string) ([]string, error) {
+	if g.Content == nil {
+		if err := g.Initialize(); err != nil {
+			return nil, errors.Join(errors.New("spec provider not initialized"), err)
+		}
+	}
+
+	matches := make([]string, 0)
+	for id, content := range g.Content {
+		if strings.Contains(strings.ToLower(content), strings.ToLower(query)) {
+			matches = append(matches, id)
+		}
+	}
+
+	return matches, nil
 }
