@@ -42,6 +42,7 @@ func main() {
 
 	tools.AddTools(server)
 	tools.AddCodeTools(server)
+	tools.AddSpecTools(server)
 
 	handler := mcp.NewStreamableHTTPHandler(func(req *http.Request) *mcp.Server {
 		return server
