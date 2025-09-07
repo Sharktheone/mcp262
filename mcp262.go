@@ -13,16 +13,6 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-type HiParams struct {
-	Name string `json:"name" jsonschema:"the name of the person to greet"`
-}
-
-func SayHi(ctx context.Context, req *mcp.CallToolRequest, args HiParams) (*mcp.CallToolResult, any, error) {
-	return &mcp.CallToolResult{
-		Content: []mcp.Content{&mcp.TextContent{Text: "Hi " + args.Name}},
-	}, nil, nil
-}
-
 func main() {
 	p, err := yavashark.NewYavasharkTestProvider()
 	if err != nil {
@@ -36,9 +26,7 @@ func main() {
 
 	url := "0.0.0.0:8080"
 
-	server := mcp.NewServer(&mcp.Implementation{Name: "greeter", Version: "v1.0.0"}, nil)
-
-	mcp.AddTool(server, &mcp.Tool{Name: "greet", Description: "say hi"}, SayHi)
+	server := mcp.NewServer(&mcp.Implementation{Name: "mcp262", Version: "v1.0.0", Title: "mcp262"}, nil)
 
 	tools.AddTools(server)
 	tools.AddCodeTools(server)
