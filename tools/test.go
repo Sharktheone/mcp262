@@ -1,4 +1,4 @@
-package test
+package tools
 
 import (
 	"context"
@@ -202,7 +202,7 @@ func GetTestStatusesInDir(ctx context.Context, req *mcp.CallToolRequest, args Ge
 	if err != nil {
 		return nil, nil, err
 	}
-	// stable order by test path
+
 	keys := make([]string, 0, len(statuses))
 	for k := range statuses {
 		keys = append(keys, k)
@@ -236,7 +236,7 @@ func GetTestStatusesInDirRec(ctx context.Context, req *mcp.CallToolRequest, args
 	if err != nil {
 		return nil, nil, err
 	}
-	// stable order by test path
+
 	keys := make([]string, 0, len(statuses))
 	for k := range statuses {
 		keys = append(keys, k)

@@ -9,7 +9,7 @@ import (
 	"github.com/Sharktheone/mcp262/provider"
 	"github.com/Sharktheone/mcp262/provider/github"
 	"github.com/Sharktheone/mcp262/provider/yavashark"
-	"github.com/Sharktheone/mcp262/test"
+	"github.com/Sharktheone/mcp262/tools"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -39,8 +39,8 @@ func main() {
 
 	mcp.AddTool(server, &mcp.Tool{Name: "greet", Description: "say hi"}, SayHi)
 
-	test.AddTools(server)
-	test.AddCodeTools(server)
+	tools.AddTools(server)
+	tools.AddCodeTools(server)
 
 	handler := mcp.NewStreamableHTTPHandler(func(req *http.Request) *mcp.Server {
 		return server
