@@ -483,93 +483,92 @@ func SearchTestInDir(ctx context.Context, req *mcp.CallToolRequest, args SearchT
 func AddTools(server *mcp.Server) {
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "NumTestsTotal",
-		Description: "Get the total number of tests",
+		Description: "Get the total number of tests (results from last CI run)",
 	}, NumTestsTotal)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "NumTestsInDir",
-		Description: "Get the number of tests in a directory",
+		Description: "Get the number of tests in a directory (results from last CI run)",
 	}, NumTestsInDir)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "NumTestsInDirRecursive",
-		Description: "Get the number of tests in a directory recursively",
+		Description: "Get the number of tests in a directory recursively (results from last CI run)",
 	}, NumTestsInDirRecursive)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "GetTestsInDirRecursive",
-		Description: "List tests in a directory recursively (paginated)",
+		Description: "List tests in a directory recursively (paginated) (results from last CI run)",
 	}, GetTestsInDirRec)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "GetTestsInDir",
-		Description: "List tests in a directory (paginated)",
+		Description: "List tests in a directory (paginated) (results from last CI run)",
 	}, GetTestsInDir)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "GetTestStatus",
-		Description: "Get the status of a single test",
+		Description: "Get the status of a single test (results from last CI run)",
 	}, GetTestStatus)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "GetTestStatusesInDirRecursive",
-		Description: "List statuses for tests in a directory recursively (paginated)",
+		Description: "List statuses for tests in a directory recursively (paginated) (results from last CI run)",
 	}, GetTestStatusesInDirRec)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "GetTestStatusesInDir",
-		Description: "List statuses for tests in a directory (paginated)",
+		Description: "List statuses for tests in a directory (paginated) (results from last CI run)",
 	}, GetTestStatusesInDir)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "GetTestsWithStatusInDirRecursive",
-		Description: "List tests with a specific status in a directory recursively (paginated)",
+		Description: "List tests with a specific status in a directory recursively (paginated) (results from last CI run)",
 	}, GetTestsWithStatusInDirRec)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "GetTestsWithStatusInDir",
-		Description: "List tests with a specific status in a directory (paginated)",
+		Description: "List tests with a specific status in a directory (paginated) (results from last CI run)",
 	}, GetTestsWithStatusInDir)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "GetFailedTestsInDirRecursive",
-		Description: "List failed tests in a directory recursively (paginated)",
+		Description: "List failed tests in a directory recursively (paginated) (results from last CI run)",
 	}, GetFailedTestsInDirRec)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "GetFailedTestsInDir",
-		Description: "List failed tests in a directory (paginated)",
+		Description: "List failed tests in a directory (paginated) (results from last CI run)",
 	}, GetFailedTestsInDir)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "GetTestsWithStatusInDirRecursive",
-		Description: "List tests with a specific status in a directory recursively (paginated)",
+		Description: "List tests with a specific status in a directory recursively (paginated) (results from last CI run)",
 	}, GetTestsWithStatusInDirRec)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "GetTestOutput",
-		Description: "Get the output of a single test",
+		Description: "Get the output of a single test (results from last CI run)",
 	}, GetTestOutput)
 
-	// Added search tool registrations
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "SearchDir",
-		Description: "Search repository paths by query (paginated)",
+		Description: "Search repository paths by query (paginated) (results from last CI run)",
 	}, SearchDir)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "SearchDirIn",
-		Description: "Search repository paths within a directory by query (paginated)",
+		Description: "Search repository paths within a directory by query (paginated) (results from last CI run)",
 	}, SearchDirIn)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "SearchTest",
-		Description: "Search tests by query (paginated)",
+		Description: "Search tests by query (paginated) (results from last CI run)",
 	}, SearchTest)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "SearchTestInDir",
-		Description: "Search tests within a directory by query (paginated)",
+		Description: "Search tests within a directory by query (paginated) (results from last CI run)",
 	}, SearchTestInDir)
 }
 
