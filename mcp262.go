@@ -32,6 +32,7 @@ func main() {
 
 	provider.SetProvider(p)
 	provider.SetCodeProvider(github.NewGithubTest262CodeProvider())
+	provider.SetSpecProvider(github.NewGithubSpecProvider())
 
 	url := "0.0.0.0:8080"
 
