@@ -1,15 +1,16 @@
 package run
 
 import (
-	"github.com/Sharktheone/mcp262/runner/results"
-	"github.com/Sharktheone/mcp262/runner/status"
-	"github.com/Sharktheone/mcp262/runner/worker"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/Sharktheone/mcp262/runner/results"
+	"github.com/Sharktheone/mcp262/runner/status"
+	"github.com/Sharktheone/mcp262/runner/worker"
 )
 
 var SKIP = []string{

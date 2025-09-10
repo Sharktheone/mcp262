@@ -2,8 +2,9 @@ package ci
 
 import (
 	"encoding/json"
-	"github.com/Sharktheone/mcp262/runner/results"
 	"os"
+
+	"github.com/Sharktheone/mcp262/runner/results"
 )
 
 func LoadPrevCi(path string) (*results.TestResults, error) {

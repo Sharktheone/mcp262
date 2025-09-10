@@ -2,10 +2,11 @@ package results
 
 import (
 	"fmt"
-	"github.com/Sharktheone/mcp262/runner/status"
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/Sharktheone/mcp262/runner/status"
 )
 
 type TestDiff struct {

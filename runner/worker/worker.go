@@ -1,9 +1,10 @@
 package worker
 
 import (
+	"sync"
+
 	"github.com/Sharktheone/mcp262/runner/results"
 	"github.com/Sharktheone/mcp262/runner/test"
-	"sync"
 )
 
 func Worker(id int, jobs <-chan string, results chan<- results.Result, wg *sync.WaitGroup) {

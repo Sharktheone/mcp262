@@ -2,10 +2,11 @@ package results
 
 import (
 	"fmt"
-	"github.com/Sharktheone/mcp262/runner/status"
 	"log"
 	"sort"
 	"time"
+
+	"github.com/Sharktheone/mcp262/runner/status"
 )
 
 type TestResults struct {

@@ -3,8 +3,6 @@ package ci
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Sharktheone/mcp262/runner/results"
-	"github.com/Sharktheone/mcp262/runner/status"
 	"log"
 	"os"
 	"os/exec"
@@ -12,6 +10,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Sharktheone/mcp262/runner/results"
+	"github.com/Sharktheone/mcp262/runner/status"
 )
 
 const MAX_NEW_TEST_FAILURES = 1000

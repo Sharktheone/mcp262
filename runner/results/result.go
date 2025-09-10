@@ -2,11 +2,12 @@ package results
 
 import (
 	"encoding/json"
-	"github.com/Sharktheone/mcp262/runner/status"
 	"log"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/Sharktheone/mcp262/runner/status"
 )
 
 const (

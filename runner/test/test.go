@@ -5,13 +5,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/Sharktheone/mcp262/runner/results"
-	"github.com/Sharktheone/mcp262/runner/status"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Sharktheone/mcp262/runner/results"
+	"github.com/Sharktheone/mcp262/runner/status"
 )
 
 const (
