@@ -24,7 +24,7 @@ func main() {
 	provider.SetCodeProvider(github.NewGithubTest262CodeProvider())
 	provider.SetSpecProvider(github.NewGithubSpecProvider())
 
-	url := "0.0.0.0:8080"
+	//url := "0.0.0.0:8080"
 
 	server := mcp.NewServer(&mcp.Implementation{Name: "mcp262", Version: "v1.0.0", Title: "mcp262"}, nil)
 
@@ -32,16 +32,24 @@ func main() {
 	tools.AddCodeTools(server)
 	tools.AddSpecTools(server)
 
-	handler := mcp.NewStreamableHTTPHandler(func(req *http.Request) *mcp.Server {
-		return server
-	}, nil)
+	//handler := mcp.NewStreamableHTTPHandler(func(req *http.Request) *mcp.Server {
+	//	return server
+	//}, nil)
 
-	handlerWithLogging := loggingHandler(handler)
+	//handler := mcp.NewSSEHandler(func(req *http.Request) *mcp.Server {
+	//	return server
+	//})
+	//
+	//handlerWithLogging := loggingHandler(handler)
+	//
+	//log.Printf("MCP server listening on %s", url)
+	//
+	//if err := http.ListenAndServe(url, handlerWithLogging); err != nil {
+	//	log.Fatalf("Server failed: %v", err)
+	//}
 
-	log.Printf("MCP server listening on %s", url)
-
-	if err := http.ListenAndServe(url, handlerWithLogging); err != nil {
-		log.Fatalf("Server failed: %v", err)
+	if err := server.Run(context.Background(), &mcp.StdioTransport{}); err != nil {
+		log.Fatal(err)
 	}
 }
 
