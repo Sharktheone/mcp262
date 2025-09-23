@@ -51,27 +51,53 @@ func computeAggregate(dir string, summaries map[string]*DirectorySummary) Direct
 	return agg
 }
 
-func printCiDiff(path string, testResults *results.TestResults, root string) bool {
+func fmtCiDiff(path string, testResults *results.TestResults, root string) (string, error) {
+	var sb strings.Builder
+
 	prev, _ := LoadPrevCi(path)
 	if prev != nil {
 		d := testResults.ComputeDiffRoot(prev, root)
 
-		fmt.Println("<=== DIFF ===>")
-		d.PrintGrouped()
+		_, err := fmt.Fprintln(&sb, "<=== DIFF ===>")
+		if err != nil {
+			return "", err
+		}
+		d.FmtGrouped(&sb)
 
-		fmt.Println()
-		fmt.Println()
-		fmt.Println("<=== Test Results ===>")
+		_, err = fmt.Fprintln(&sb)
+		if err != nil {
+			return "", err
+		}
+		_, err = fmt.Fprintln(&sb)
+		if err != nil {
+			return "", err
+		}
+		_, err = fmt.Fprintln(&sb)
+		if err != nil {
+			return "", err
+		}
+		_, err = fmt.Fprintln(&sb, "<=== Test Results ===>")
+		if err != nil {
+			return "", err
+		}
+		_, err = fmt.Fprintln(&sb)
+		if err != nil {
+			return "", err
+		}
 
-		testResults.PrintResults()
+		testResults.FmtResults(&sb)
 
-		fmt.Println()
-		fmt.Println("<=== Comparison ===>")
+		_, err = fmt.Fprintln(&sb)
+		if err != nil {
+			return "", err
+		}
+		_, err = fmt.Fprintln(&sb, "<=== Comparison ===>")
+		if err != nil {
+			return "", err
+		}
 
 		testResults.Compare(prev)
-
-		return d.NewTestFailures() > MAX_NEW_TEST_FAILURES
 	}
 
-	return false
+	return sb.String(), nil
 }

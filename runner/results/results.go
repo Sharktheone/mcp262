@@ -2,6 +2,7 @@ package results
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"sort"
 	"time"
@@ -110,6 +111,18 @@ func (tr *TestResults) PrintResults() {
 	tr.PrintMemoryStats()
 }
 
+func (tr *TestResults) FmtResults(w io.Writer) {
+	writeRes(w, "Passed", tr.Passed, tr.Total)
+	writeRes(w, "Failed", tr.Failed, tr.Total)
+	writeRes(w, "Skipped", tr.Skipped, tr.Total)
+	writeRes(w, "Not Implemented", tr.NotImplemented, tr.Total)
+	writeRes(w, "Runner Error", tr.RunnerError, tr.Total)
+	writeRes(w, "Crashed", tr.Crashed, tr.Total)
+	writeRes(w, "Timeout", tr.Timeout, tr.Total)
+	writeRes(w, "Parse Error", tr.ParseError, tr.Total)
+	_, _ = fmt.Fprintf(w, "Total: %d\n", tr.Total)
+}
+
 func formatMemory(kb uint64) string {
 	if kb >= 1024*1024 {
 		gb := float64(kb) / (1024 * 1024)
@@ -179,6 +192,10 @@ func (tr *TestResults) PrintMemoryStats() {
 
 func printRes(name string, n uint32, total uint32) {
 	fmt.Printf("%s: %d, %f%%\n", name, n, float64(n)/float64(total)*100)
+}
+
+func writeRes(w io.Writer, name string, n uint32, total uint32) {
+	_, _ = fmt.Fprintf(w, "%s: %d, %f%%\n", name, n, float64(n)/float64(total)*100)
 }
 
 func (tr *TestResults) ComparePrev() error {

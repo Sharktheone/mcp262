@@ -2,6 +2,7 @@ package results
 
 import (
 	"fmt"
+	"io"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -135,6 +136,17 @@ func (d *Diff) PrintGrouped() {
 		fmt.Printf("Diff: %s -> %s\n", k.From, k.To)
 		for _, item := range v {
 			fmt.Printf("  - %s\n", item.own.Path)
+		}
+	}
+
+	print("\n\n\n")
+}
+
+func (d *Diff) FmtGrouped(w io.Writer) {
+	for k, v := range *d {
+		_, _ = fmt.Fprintf(w, "Diff: %s -> %s\n", k.From, k.To)
+		for _, item := range v {
+			_, _ = fmt.Fprintf(w, "  - %s\n", item.own.Path)
 		}
 	}
 
