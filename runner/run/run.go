@@ -2,6 +2,7 @@ package run
 
 import (
 	"github.com/Sharktheone/mcp262/runner/rebuild"
+	"github.com/Sharktheone/mcp262/runner/test"
 	"log"
 	"os"
 	"path/filepath"
@@ -109,6 +110,20 @@ func testsInDir(testRoot string, testDir string, workers int, loc *rebuild.Engin
 	close(resultsChan)
 
 	return testResults
+}
+
+func RunSingleTest(testRoot string, testPath string, repoRoot string, rebuildEngine bool) (results.Result, error) {
+	loc, cancel, err := rebuild.RebuildEngine(repoRoot, 1, rebuildEngine)
+
+	cancel()
+
+	if err != nil {
+		return results.Result{}, err
+	}
+
+	engine := loc.GetPath()
+
+	return test.RunTest(testRoot, testPath, engine), nil
 }
 
 func countTests(path string) uint32 {
