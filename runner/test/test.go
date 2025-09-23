@@ -16,24 +16,23 @@ import (
 )
 
 const (
-	ENGINE_LOCATION = "../../target/release/yavashark_test262"
-
 	TIMEOUT = 30 * time.Second
 )
 
-func RunTest(path string) results.Result {
+func RunTest(path, fullPath, engine string) results.Result {
 	startTime := time.Now()
 
 	ctx, cancel := context.WithTimeout(context.Background(), TIMEOUT)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, ENGINE_LOCATION, path)
+	cmd := exec.CommandContext(ctx, engine, fullPath)
 
 	var b bytes.Buffer
 	cmd.Stdout = &b
 	cmd.Stderr = &b
 
 	err := cmd.Start()
+
 	if err != nil {
 		return results.Result{
 			Status:   status.RUNNER_ERROR,

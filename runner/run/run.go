@@ -1,6 +1,7 @@
 package run
 
 import (
+	"github.com/Sharktheone/mcp262/runner/rebuild"
 	"log"
 	"os"
 	"path/filepath"
@@ -18,8 +19,26 @@ var SKIP = []string{
 	"staging",
 }
 
-func TestsInDir(testRoot string, workers int) *results.TestResults {
-	jobs := make(chan string, workers*8)
+func RunWithRebuild(testRoot string, testDir string, repoRoot string, workers int) *results.TestResults {
+	num := countTests(filepath.Join(testRoot, testDir))
+
+	loc, cancel, err := rebuild.RebuildEngine(repoRoot, num)
+
+	if err != nil {
+		log.Printf("Failed to rebuild engine: %v", err)
+		return nil
+	}
+
+	res := TestsInDir(testRoot, testDir, workers, loc, num)
+
+	cancel()
+
+	return res
+}
+
+func TestsInDir(testRoot string, testDir string, workers int, loc *rebuild.EngineLocation, num uint32) *results.TestResults {
+	jobs := make(chan worker.Job, workers*8)
+	testsDir := filepath.Join(testRoot, testDir)
 
 	resultsChan := make(chan results.Result, workers*8)
 
@@ -28,10 +47,8 @@ func TestsInDir(testRoot string, workers int) *results.TestResults {
 	wg.Add(workers)
 
 	for i := range workers {
-		go worker.Worker(i, jobs, resultsChan, wg)
+		go worker.Worker(i, jobs, resultsChan, wg, loc)
 	}
-
-	num := countTests(testRoot)
 
 	testResults := results.New(num)
 
@@ -42,7 +59,7 @@ func TestsInDir(testRoot string, workers int) *results.TestResults {
 	}()
 
 	now := time.Now()
-	_ = filepath.Walk(testRoot, func(path string, info os.FileInfo, err error) error {
+	_ = filepath.Walk(testsDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			//log.Printf("Failed to get file info for %s: %v", path, err)
 			return nil
@@ -67,7 +84,7 @@ func TestsInDir(testRoot string, workers int) *results.TestResults {
 				resultsChan <- results.Result{
 					Status:   status.SKIP,
 					Msg:      "skip",
-					Path:     path,
+					Path:     p,
 					MemoryKB: 0,
 					Duration: 0,
 				}
@@ -76,7 +93,10 @@ func TestsInDir(testRoot string, workers int) *results.TestResults {
 			}
 		}
 
-		jobs <- path
+		jobs <- worker.Job{
+			FullPath:     path,
+			RelativePath: p,
+		}
 
 		return nil
 	})
