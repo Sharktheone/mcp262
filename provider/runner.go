@@ -1,9 +1,9 @@
 package provider
 
 type TestRunner interface {
-	RerunTest(testPath string) (TestResult, error)
-	RerunTestsInDir(dir string) (map[string]TestResult, error)
-	RerunFailedTestsInDir(dir string) (map[string]TestResult, error)
+	RerunTest(testPath string, rebuild bool) (TestResult, error)
+	RerunTestsInDir(dir string, rebuild bool) (map[string]TestResult, error)
+	RerunFailedTestsInDir(dir string, rebuild bool) (map[string]TestResult, error)
 }
 
 type TestResult struct {

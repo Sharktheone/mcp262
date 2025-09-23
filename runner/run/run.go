@@ -19,24 +19,24 @@ var SKIP = []string{
 	"staging",
 }
 
-func RunWithRebuild(testRoot string, testDir string, repoRoot string, workers int) *results.TestResults {
+func RunTestsInDir(testRoot string, testDir string, repoRoot string, workers int, rebuildEngine bool) *results.TestResults {
 	num := countTests(filepath.Join(testRoot, testDir))
 
-	loc, cancel, err := rebuild.RebuildEngine(repoRoot, num)
+	loc, cancel, err := rebuild.RebuildEngine(repoRoot, num, rebuildEngine)
 
 	if err != nil {
 		log.Printf("Failed to rebuild engine: %v", err)
 		return nil
 	}
 
-	res := TestsInDir(testRoot, testDir, workers, loc, num)
+	res := testsInDir(testRoot, testDir, workers, loc, num)
 
 	cancel()
 
 	return res
 }
 
-func TestsInDir(testRoot string, testDir string, workers int, loc *rebuild.EngineLocation, num uint32) *results.TestResults {
+func testsInDir(testRoot string, testDir string, workers int, loc *rebuild.EngineLocation, num uint32) *results.TestResults {
 	jobs := make(chan worker.Job, workers*8)
 	testsDir := filepath.Join(testRoot, testDir)
 

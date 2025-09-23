@@ -22,10 +22,12 @@ func (engine *EngineLocation) GetPath() string {
 	return engine.ReleasePath
 }
 
-func RebuildEngine(repoRoot string, numTests uint32) (*EngineLocation, context.CancelFunc, error) {
-	debugErr := rebuildDebugEngine(repoRoot)
-	if debugErr != nil {
-		return nil, nil, debugErr
+func RebuildEngine(repoRoot string, numTests uint32, rebuild bool) (*EngineLocation, context.CancelFunc, error) {
+	if rebuild {
+		debugErr := rebuildDebugEngine(repoRoot)
+		if debugErr != nil {
+			return nil, nil, debugErr
+		}
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -35,7 +37,7 @@ func RebuildEngine(repoRoot string, numTests uint32) (*EngineLocation, context.C
 		DebugPath:   repoRoot + "/target/debug/yavashark_test262",
 	}
 
-	if numTests > RELEASE_BUILD_THRESHOLD {
+	if numTests > RELEASE_BUILD_THRESHOLD && rebuild {
 		go func() {
 			releaseErr := rebuildReleaseEngine(repoRoot, ctx)
 			if releaseErr != nil {
