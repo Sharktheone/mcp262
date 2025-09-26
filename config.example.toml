@@ -1,0 +1,3 @@
+workers = 256
+repo_path = "./"
+test_root_dir = "./test262/test"

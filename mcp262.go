@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"log"
 	"net/http"
 	"time"
@@ -16,6 +15,8 @@ import (
 )
 
 func main() {
+	config := runner.LoadConfig()
+
 	p, err := yavashark.NewYavasharkTestProvider()
 	if err != nil {
 		log.Fatalf("Failed to create YavasharkTestProvider: %v", err)
@@ -25,8 +26,9 @@ func main() {
 	provider.SetProvider(p)
 	provider.SetCodeProvider(github.NewGithubTest262CodeProvider())
 	provider.SetSpecProvider(github.NewGithubSpecProvider())
+	provider.SetRunner(runner.New(config.TestRootDir, config.RepoPath, config.Workers))
 
-	//url := "0.0.0.0:8080"
+	url := "0.0.0.0:8080"
 
 	server := mcp.NewServer(&mcp.Implementation{Name: "mcp262", Version: "v1.0.0", Title: "mcp262"}, nil)
 
@@ -35,25 +37,25 @@ func main() {
 	tools.AddSpecTools(server)
 	tools.AddRunnerTools(server)
 
-	//handler := mcp.NewStreamableHTTPHandler(func(req *http.Request) *mcp.Server {
-	//	return server
-	//}, nil)
+	handler := mcp.NewStreamableHTTPHandler(func(req *http.Request) *mcp.Server {
+		return server
+	}, nil)
 
 	//handler := mcp.NewSSEHandler(func(req *http.Request) *mcp.Server {
 	//	return server
 	//})
-	//
-	//handlerWithLogging := loggingHandler(handler)
-	//
-	//log.Printf("MCP server listening on %s", url)
-	//
-	//if err := http.ListenAndServe(url, handlerWithLogging); err != nil {
-	//	log.Fatalf("Server failed: %v", err)
-	//}
 
-	if err := server.Run(context.Background(), &mcp.StdioTransport{}); err != nil {
-		log.Fatal(err)
+	handlerWithLogging := loggingHandler(handler)
+
+	log.Printf("MCP server listening on %s", url)
+
+	if err := http.ListenAndServe(url, handlerWithLogging); err != nil {
+		log.Fatalf("Server failed: %v", err)
 	}
+
+	//if err := server.Run(context.Background(), &mcp.StdioTransport{}); err != nil {
+	//	log.Fatal(err)
+	//}
 }
 
 type responseWriter struct {

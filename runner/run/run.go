@@ -114,13 +114,11 @@ func testsInDir(testRoot string, testDir string, workers int, loc *rebuild.Engin
 func RunSingleTest(testRoot string, testPath string, repoRoot string, rebuildEngine bool) (results.Result, error) {
 	loc, cancel, err := rebuild.RebuildEngine(repoRoot, 1, rebuildEngine)
 
-	log.Printf("Engine located at: %s", loc.GetPath())
-
-	cancel()
-
 	if err != nil {
 		return results.Result{}, err
 	}
+
+	cancel()
 
 	engine := loc.GetPath()
 
