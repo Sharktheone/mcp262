@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"log"
 	"strings"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -17,8 +18,14 @@ func RespondWith(res any) *mcp.CallToolResult {
 }
 
 func ResolvePath(path string) string {
+	log.Println(path)
 	path = strings.TrimPrefix(path, "/")
 	path = strings.TrimPrefix(path, "test262/")
+
+	if path == "test" {
+		return ""
+
+	}
 	path = strings.TrimPrefix(path, "test/")
 
 	return path
