@@ -45,12 +45,12 @@ func RebuildEngine(repoRoot string, numTests uint32, rebuild bool) (*EngineLocat
 				return
 			}
 
-			engine.UseDebug.Store(true)
+			engine.UseDebug.Store(false)
 		}()
 
 	}
 
-	engine.UseDebug.Store(false)
+	engine.UseDebug.Store(true)
 
 	return engine, cancel, nil
 
