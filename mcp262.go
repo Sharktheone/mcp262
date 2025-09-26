@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Sharktheone/mcp262/runner"
+
 	"github.com/Sharktheone/mcp262/provider"
 	"github.com/Sharktheone/mcp262/provider/github"
 	"github.com/Sharktheone/mcp262/provider/yavashark"
@@ -31,6 +33,7 @@ func main() {
 	tools.AddTools(server)
 	tools.AddCodeTools(server)
 	tools.AddSpecTools(server)
+	tools.AddRunnerTools(server)
 
 	//handler := mcp.NewStreamableHTTPHandler(func(req *http.Request) *mcp.Server {
 	//	return server
