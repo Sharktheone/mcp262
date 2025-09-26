@@ -20,21 +20,20 @@ var SKIP = []string{
 	"staging",
 }
 
-func RunTestsInDir(testRoot string, testDir string, repoRoot string, workers int, rebuildEngine bool) *results.TestResults {
+func RunTestsInDir(testRoot string, testDir string, repoRoot string, workers int, rebuildEngine bool) (*results.TestResults, error) {
 	num := countTests(filepath.Join(testRoot, testDir))
 
 	loc, cancel, err := rebuild.RebuildEngine(repoRoot, num, rebuildEngine)
 
 	if err != nil {
-		log.Printf("Failed to rebuild engine: %v", err)
-		return nil
+		return nil, err
 	}
 
 	res := testsInDir(testRoot, testDir, workers, loc, num)
 
 	cancel()
 
-	return res
+	return res, nil
 }
 
 func testsInDir(testRoot string, testDir string, workers int, loc *rebuild.EngineLocation, num uint32) *results.TestResults {
@@ -115,6 +114,8 @@ func testsInDir(testRoot string, testDir string, workers int, loc *rebuild.Engin
 func RunSingleTest(testRoot string, testPath string, repoRoot string, rebuildEngine bool) (results.Result, error) {
 	loc, cancel, err := rebuild.RebuildEngine(repoRoot, 1, rebuildEngine)
 
+	log.Printf("Engine located at: %s", loc.GetPath())
+
 	cancel()
 
 	if err != nil {
@@ -123,7 +124,9 @@ func RunSingleTest(testRoot string, testPath string, repoRoot string, rebuildEng
 
 	engine := loc.GetPath()
 
-	return test.RunTest(testRoot, testPath, engine), nil
+	fullPath := filepath.Join(testRoot, testPath)
+
+	return test.RunTest(testPath, fullPath, engine), nil
 }
 
 func countTests(path string) uint32 {
