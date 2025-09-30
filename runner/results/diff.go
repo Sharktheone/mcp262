@@ -20,6 +20,18 @@ type DiffItem struct {
 	other *Result
 }
 
+func (d *DiffItem) Path() string {
+	if d.own != nil {
+		return d.own.Path
+	}
+
+	if d.other != nil {
+		return d.other.Path
+	}
+
+	return ""
+}
+
 type Diff map[TestDiff][]DiffItem
 type AggregatedDiff map[string]DiffItem
 

@@ -45,10 +45,11 @@ func RerunTestsInDir(ctx context.Context, req *mcp.CallToolRequest, args RerunTe
 		return nil, nil, err
 	}
 	p := utils.ResolvePath(args.Dir)
-	results, err := runner.RerunTestsInDir(p, args.Rebuild)
+	results, err := runner.RerunTestsInDirChanges(p, args.Rebuild)
 	if err != nil {
 		return nil, nil, err
 	}
+
 	return utils.RespondWith(map[string]any{
 		"results": results,
 	}), nil, nil
@@ -60,7 +61,7 @@ func RerunFailedTestsInDir(ctx context.Context, req *mcp.CallToolRequest, args R
 		return nil, nil, err
 	}
 	p := utils.ResolvePath(args.Dir)
-	results, err := runner.RerunFailedTestsInDir(p, args.Rebuild)
+	results, err := runner.RerunFailedTestsInDirChanges(p, args.Rebuild)
 	if err != nil {
 		return nil, nil, err
 	}
