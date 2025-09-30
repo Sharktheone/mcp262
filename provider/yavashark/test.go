@@ -10,8 +10,11 @@ import (
 	"github.com/Sharktheone/mcp262/testtree"
 )
 
-const RESULTS_URL = "https://raw.githubusercontent.com/Sharktheone/yavashark-data/refs/heads/main/results.json"
-const BASE_RESULT_URL = "https://raw.githubusercontent.com/Sharktheone/yavashark-data/refs/heads/main/results"
+//const RESULTS_URL = "https://raw.githubusercontent.com/Sharktheone/yavashark-data/refs/heads/main/results.json"
+//const BASE_RESULT_URL = "https://raw.githubusercontent.com/Sharktheone/yavashark-data/refs/heads/main/results"
+
+const RESULTS_URL = "http://localhost:1215/api/current"
+const BASE_RESULT_URL = "http://localhost:1215/api/info/"
 
 var FailedStatuses = []string{"FAIL", "TIMEOUT", "CRASH", "NOT_IMPLEMENTED", "RUNNER_ERROR", "ERROR"}
 
@@ -45,7 +48,7 @@ func NewYavasharkTestProvider() (*YavasharkTestProvider, error) {
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
-		return nil, err
+		return nil, errors.New("failed to fetch Yavashark results, status code: " + res.Status)
 	}
 
 	var results []YavasharkTestResult
