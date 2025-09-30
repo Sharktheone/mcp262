@@ -3,6 +3,7 @@ package rebuild
 import (
 	"context"
 	"os/exec"
+	"path/filepath"
 	"sync/atomic"
 )
 
@@ -59,7 +60,7 @@ func RebuildEngine(repoRoot string, numTests uint32, rebuild bool) (*EngineLocat
 func rebuildDebugEngine(repoRoot string) error {
 	cmd := exec.Command("cargo", "build")
 
-	cmd.Dir = repoRoot
+	cmd.Dir = filepath.Join(repoRoot, "crates/yavashark_test262")
 
 	return cmd.Run()
 }
@@ -67,7 +68,7 @@ func rebuildDebugEngine(repoRoot string) error {
 func rebuildReleaseEngine(repoRoot string, ctx context.Context) error {
 	cmd := exec.CommandContext(ctx, "cargo", "build", "--release")
 
-	cmd.Dir = repoRoot
+	cmd.Dir = filepath.Join(repoRoot, "crates/yavashark_test262")
 
 	return cmd.Run()
 }
