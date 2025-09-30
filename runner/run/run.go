@@ -1,14 +1,15 @@
 package run
 
 import (
-	"github.com/Sharktheone/mcp262/runner/rebuild"
-	"github.com/Sharktheone/mcp262/runner/test"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/Sharktheone/mcp262/runner/rebuild"
+	"github.com/Sharktheone/mcp262/runner/test"
 
 	"github.com/Sharktheone/mcp262/runner/results"
 	"github.com/Sharktheone/mcp262/runner/status"
@@ -29,14 +30,14 @@ func RunTestsInDir(testRoot string, testDir string, repoRoot string, workers int
 		return nil, err
 	}
 
-	res := testsInDir(testRoot, testDir, workers, loc, num)
+	res := testsInDir(testRoot, testDir, repoRoot, workers, loc, num)
 
 	cancel()
 
 	return res, nil
 }
 
-func testsInDir(testRoot string, testDir string, workers int, loc *rebuild.EngineLocation, num uint32) *results.TestResults {
+func testsInDir(testRoot, testDir, repoRoot string, workers int, loc *rebuild.EngineLocation, num uint32) *results.TestResults {
 	jobs := make(chan worker.Job, workers*8)
 	testsDir := filepath.Join(testRoot, testDir)
 
@@ -47,7 +48,7 @@ func testsInDir(testRoot string, testDir string, workers int, loc *rebuild.Engin
 	wg.Add(workers)
 
 	for i := range workers {
-		go worker.Worker(i, jobs, resultsChan, wg, loc)
+		go worker.Worker(i, repoRoot, jobs, resultsChan, wg, loc)
 	}
 
 	testResults := results.New(num)
@@ -124,7 +125,7 @@ func RunSingleTest(testRoot string, testPath string, repoRoot string, rebuildEng
 
 	fullPath := filepath.Join(testRoot, testPath)
 
-	return test.RunTest(testPath, fullPath, engine), nil
+	return test.RunTest(testPath, fullPath, engine, repoRoot), nil
 }
 
 func countTests(path string) uint32 {

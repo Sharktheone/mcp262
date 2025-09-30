@@ -1,10 +1,11 @@
 package worker
 
 import (
+	"sync"
+
 	"github.com/Sharktheone/mcp262/runner/rebuild"
 	"github.com/Sharktheone/mcp262/runner/results"
 	"github.com/Sharktheone/mcp262/runner/test"
-	"sync"
 )
 
 type Job struct {
@@ -12,13 +13,13 @@ type Job struct {
 	RelativePath string
 }
 
-func Worker(id int, jobs <-chan Job, results chan<- results.Result, wg *sync.WaitGroup, loc *rebuild.EngineLocation) {
+func Worker(id int, root string, jobs <-chan Job, results chan<- results.Result, wg *sync.WaitGroup, loc *rebuild.EngineLocation) {
 	defer wg.Done()
 
 	for job := range jobs {
 		engine := loc.GetPath()
 
-		res := test.RunTest(job.RelativePath, job.FullPath, engine)
+		res := test.RunTest(job.RelativePath, job.FullPath, engine, root)
 
 		results <- res
 	}

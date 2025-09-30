@@ -19,13 +19,15 @@ const (
 	TIMEOUT = 30 * time.Second
 )
 
-func RunTest(path, fullPath, engine string) results.Result {
+func RunTest(path, fullPath, engine, root string) results.Result {
 	startTime := time.Now()
 
 	ctx, cancel := context.WithTimeout(context.Background(), TIMEOUT)
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, engine, fullPath)
+
+	cmd.Dir = root
 
 	var b bytes.Buffer
 	cmd.Stdout = &b
