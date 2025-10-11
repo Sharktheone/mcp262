@@ -10,6 +10,7 @@ import (
 )
 
 const SpecLocation = "https://raw.githubusercontent.com/tc39/ecma262/refs/heads/main/spec.html"
+const IntlSpecLocation = "https://tc39.es/ecma402/"
 
 type GithubSpecProvider struct {
 	Content  map[string]string
@@ -20,8 +21,8 @@ func NewGithubSpecProvider() *GithubSpecProvider {
 	return &GithubSpecProvider{}
 }
 
-func (g *GithubSpecProvider) Initialize() error {
-	resp, err := http.Get(SpecLocation)
+func (g *GithubSpecProvider) initializeSpec(url string) error {
+	resp, err := http.Get(url)
 	if err != nil {
 		return err
 	}
@@ -35,11 +36,6 @@ func (g *GithubSpecProvider) Initialize() error {
 	if err != nil {
 		return err
 	}
-
-	if g.Content == nil {
-		g.Content = make(map[string]string)
-	}
-	g.Sections = g.Sections[:0]
 
 	var walk func(n *html.Node)
 	walk = func(n *html.Node) {
@@ -63,6 +59,23 @@ func (g *GithubSpecProvider) Initialize() error {
 		}
 	}
 	walk(root)
+
+	return nil
+}
+
+func (g *GithubSpecProvider) Initialize() error {
+	if g.Content == nil {
+		g.Content = make(map[string]string)
+	}
+	g.Sections = g.Sections[:0]
+
+	if err := g.initializeSpec(IntlSpecLocation); err != nil {
+		return err
+	}
+
+	if err := g.initializeSpec(SpecLocation); err != nil {
+		return err
+	}
 
 	return nil
 }
