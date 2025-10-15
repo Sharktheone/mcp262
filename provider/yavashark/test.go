@@ -10,11 +10,8 @@ import (
 	"github.com/Sharktheone/mcp262/testtree"
 )
 
-//const RESULTS_URL = "https://raw.githubusercontent.com/Sharktheone/yavashark-data/refs/heads/main/results.json"
-//const BASE_RESULT_URL = "https://raw.githubusercontent.com/Sharktheone/yavashark-data/refs/heads/main/results"
-
-const RESULTS_URL = "http://localhost:1215/api/current"
-const BASE_RESULT_URL = "http://localhost:1215/api/info/"
+const RESULTS_URL = "https://raw.githubusercontent.com/Sharktheone/yavashark-data/refs/heads/main/results.json"
+const BASE_RESULT_URL = "https://raw.githubusercontent.com/Sharktheone/yavashark-data/refs/heads/main/results"
 
 var FailedStatuses = []string{"FAIL", "TIMEOUT", "CRASH", "NOT_IMPLEMENTED", "RUNNER_ERROR", "ERROR"}
 
